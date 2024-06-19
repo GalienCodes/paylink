@@ -34,7 +34,6 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         string invoiceId;
         string productId;
         address from;
-        address client;
         uint256 amount;
         statusEnum status;
     }
@@ -54,7 +53,6 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         string invoiceId,
         string productId,
         address from,
-        address client,
         uint256 amount,
         statusEnum status
     );
@@ -148,14 +146,12 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
      * @param _invoiceId The ID of the invoice.
      * @param _productId The ID of the product.
      * @param _from The address issuing the invoice.
-     * @param _client The address of the client.
      * @param _amount The amount to be paid.
      */
     function createInvoice(
         string memory _invoiceId,
         string memory _productId,
         address _from,
-        address _client,
         uint256 _amount
     ) external nonReentrant {
         require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= 0, "Insufficient Balance");
@@ -166,7 +162,6 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
             invoiceId: _invoiceId,
             productId: _productId,
             from: _from,
-            client: _client,
             amount: _amount,
             status: statusEnum.PENDINDING
         });
@@ -174,7 +169,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         // Generate an invoice at 0.5% fee of the amount(by default)
         IERC20(cUsdTokenAddress).transferFrom(msg.sender, deployer, (_amount * 5)/ 100);
 
-        emit InvoiceCreated(_invoiceId, _productId, _from, _client, _amount, statusEnum.PENDINDING);
+        emit InvoiceCreated(_invoiceId, _productId, _from, _amount, statusEnum.PENDINDING);
     }
 
     /**
