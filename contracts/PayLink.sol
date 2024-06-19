@@ -11,7 +11,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 contract PayLink is Initializable, ReentrancyGuardUpgradeable {
     address private deployer;
     address private cUsdTokenAddress;
-    uint256 public globalLinkFee= 2e18;
 
     enum statusEnum{
         PENDINDING,
@@ -57,11 +56,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         statusEnum status
     );
     event PaidInvoice(string invoiceId, uint256 amount,  statusEnum status);
-    
-    modifier onlyDeployer() {
-        require(msg.sender == deployer, "Only deployer can call this function");
-        _;
-    }
+
 
     /**
      * @dev Initializes the contract by setting the configuration addresses.
@@ -78,7 +73,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
      * @param linkID The ID of the global payment link.
      */
     function createGlobalPaymentLink(string memory linkID) external nonReentrant {
-        require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= globalLinkFee, "Insufficient Balance");
+        require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= 0, "Insufficient Balance");
         require(!globalinkIDExist[linkID], "Global link ID not exist");
 
         globalinkIDExist[linkID] = true; 
@@ -88,7 +83,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         });
                 
         // Transfer 2 cUSD to deployer as link generation fee(by default)
-        IERC20(cUsdTokenAddress).transferFrom(msg.sender, deployer, globalLinkFee); // Assuming cUSD has 18 decimals
+        IERC20(cUsdTokenAddress).transferFrom(msg.sender, deployer, 2e18); 
         emit GlobalPaymentLinkCreated(linkID, msg.sender);
     }
     
@@ -110,7 +105,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
      * @param _amount The amount to be paid through the link.
      */
     function createFixedPaymentLink(string memory linkID, uint256 _amount) external nonReentrant {
-        require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= _amount, "Insufficient Balance");
+        require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= 0, "Insufficient Balance");
         require(!fixedinkIDExist[linkID], "Link does not exist");
 
         fixedinkIDExist[linkID] = true; 
@@ -145,13 +140,11 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
      * @dev Creates an invoice.
      * @param _invoiceId The ID of the invoice.
      * @param _productId The ID of the product.
-     * @param _from The address issuing the invoice.
      * @param _amount The amount to be paid.
      */
     function createInvoice(
         string memory _invoiceId,
         string memory _productId,
-        address _from,
         uint256 _amount
     ) external nonReentrant {
         require(IERC20(cUsdTokenAddress).balanceOf(msg.sender) >= 0, "Insufficient Balance");
@@ -161,7 +154,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         invoice[_invoiceId] = Invoice({
             invoiceId: _invoiceId,
             productId: _productId,
-            from: _from,
+            from: msg.sender,
             amount: _amount,
             status: statusEnum.PENDINDING
         });
@@ -169,7 +162,7 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         // Generate an invoice at 0.5% fee of the amount(by default)
         IERC20(cUsdTokenAddress).transferFrom(msg.sender, deployer, (_amount * 5)/ 100);
 
-        emit InvoiceCreated(_invoiceId, _productId, _from, _amount, statusEnum.PENDINDING);
+        emit InvoiceCreated(_invoiceId, _productId, msg.sender, _amount, statusEnum.PENDINDING);
     }
 
     /**
@@ -184,10 +177,5 @@ contract PayLink is Initializable, ReentrancyGuardUpgradeable {
         IERC20(cUsdTokenAddress).transferFrom(msg.sender, invoice[_invoiceId].from, invoice[_invoiceId].amount);
 
         emit PaidInvoice(invoice[_invoiceId].invoiceId, invoice[_invoiceId].amount, invoice[_invoiceId].status);
-    }
-
-    // set the globalLinkFee
-    function setGlobalLinkFee(uint _globalLinkFee) external nonReentrant onlyDeployer{
-        globalLinkFee = _globalLinkFee;
     }
 }
