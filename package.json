@@ -18,7 +18,7 @@
     "@openzeppelin/hardhat-upgrades": "^3.0.3",
     "ethers": "^6.13.0",
     "hardhat": "^2.20.1",
-    "hardhat-deploy": "^0.11.45",
+    "hardhat-deploy": "^0.12.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
