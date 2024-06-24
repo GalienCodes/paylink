@@ -28,7 +28,7 @@
     "@typechain/ethers-v6": "^0.5.0",
     "@typechain/hardhat": "^9.0.0",
     "@types/chai": "^4.2.0",
-    "@types/mocha": ">=9.1.0",
+    "@types/mocha": ">=10.0.7",
     "chai": "^4.2.0",
     "dotenv": "^16.4.5",
     "hardhat-gas-reporter": "^1.0.8",
