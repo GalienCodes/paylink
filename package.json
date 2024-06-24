@@ -20,7 +20,7 @@
     "hardhat": "^2.20.1",
     "hardhat-deploy": "^0.11.45",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
